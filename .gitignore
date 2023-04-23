@@ -1,0 +1,42 @@
+# Object files
+*.o
+*.lo
+*.la
+*.Po
+
+# Compiled binaries
+modbus_akita
+*.out
+
+# Temporary files
+*~
+*.swp
+*.bak
+
+# Build artifacts
+config.log
+config.status
+autom4te.cache/
+Makefile
+Makefile.in
+aclocal.m4
+config.h
+config.h.in
+configure
+depcomp
+install-sh
+missing
+compile
+ltmain.sh
+stamp-h1
+*.Po
+
+# Generated files
+*.tar.gz
+*.tar.xz
+*.tar.bz2
+*.tar
+*.zip
+
+# Debug files
+*.dSYM/
