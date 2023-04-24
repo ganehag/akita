@@ -10,6 +10,11 @@ AC_CHECK_LIB([modbus],
              [AC_SUBST([MODBUS_LIBS], ["-lmodbus"])],
              [AC_MSG_ERROR([modbus library not found!])])
 
+# AC_PATH_PROG(PANDOC, pandoc, no)
+# if test "$PANDOC" = "no"; then
+#   AC_MSG_ERROR([pandoc not found. Install pandoc and try again.])
+# fi
+
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
   Makefile
