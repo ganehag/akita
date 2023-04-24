@@ -55,19 +55,19 @@ This command will install the Akita binary in `/usr/local/bin` and the configura
 
 ## Configuration
 
-Akita can be configured using a text-based configuration file. By default, the configuration file should be located at `/etc/akita/config` or can be specified by setting the `AKITA_CONFIG_PATH` environment variable.
+Akita can be configured using a text-based configuration file. By default, the configuration file should be located at `/etc/akita/akita.conf`.
 
 Here's an example configuration file:
 
 ```text
-config akita 'config'
-    option host '10.0.0.126'
-    option port '5020'
-    option slave_id '1'
-    option register_address '0'
-    option interval '5'
-    option timeout '10'
-    option script_dir 'scripts.d'
+host=127.0.0.1
+port=502
+slave_id=1
+register_address=0
+interval=600
+timeout=1800
+script_dir=/etc/akita/scripts.d
+run_on_exit=true
 ```
 
 Options:
@@ -89,7 +89,7 @@ To run the Akita Modbus Watchdog, simply execute the compiled binary:
 You can run the Akita daemon in the background using the following command:
 
 ```bash
-nohup ./akita &
+nohup ./akita -c /etc/akita/akita.conf &
 ```
 
 ## License

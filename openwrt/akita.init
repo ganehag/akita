@@ -1,16 +1,53 @@
 #!/bin/sh /etc/rc.common
 
 USE_PROCD=1
-START=1
-STOP=99
+START=99
+STOP=1
+SERVICE_NAME="akita"
+CONFIG_FILE="/etc/config/akita"
+TEMP_CONFIG_FILE="/tmp/akita.conf"
+
+config_load_akita() {
+    local section="$1"
+    config_get host "$section" host
+    config_get port "$section" port
+    config_get slave_id "$section" slave_id
+    config_get register_address "$section" register_address
+    config_get interval "$section" interval
+    config_get timeout "$section" timeout
+    config_get script_dir "$section" script_dir
+}
+
+create_temp_config_file() {
+    cat <<EOF > ${TEMP_CONFIG_FILE}
+host=${host}
+port=${port}
+slave_id=${slave_id}
+register_address=${register_address}
+interval=${interval}
+timeout=${timeout}
+script_dir=${script_dir}
+EOF
+}
+
+remove_temp_config_file() {
+    rm -f ${TEMP_CONFIG_FILE}
+}
 
 start_service() {
-	procd_open_instance
-	procd_set_param command /usr/bin/modbus_akita /etc/config/modbus_akita
-	procd_set_param respawn ${respawn_threshold:-3600} ${respawn_timeout:-5} ${respawn_retry:-0}
-	procd_close_instance
+    config_load "${SERVICE_NAME}"
+    config_foreach config_load_akita "${SERVICE_NAME}"
+    create_temp_config_file
+    procd_open_instance
+    procd_set_param command /usr/bin/akita -c ${TEMP_CONFIG_FILE}
+    procd_set_param respawn ${respawn_threshold:-3600} ${respawn_timeout:-5} ${respawn_retry:-0}
+    procd_close_instance
+}
+
+stop_service() {
+    remove_temp_config_file
 }
 
 service_triggers() {
-	procd_add_reload_trigger "akita"
+    procd_add_reload_trigger "${SERVICE_NAME}"
 }

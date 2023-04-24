@@ -29,13 +29,14 @@ typedef struct {
   int interval;
   int timeout;
   char script_dir[MAX_OPTION_LENGTH];
-} AkitaConfig;
+} akita_config_t;
 
 typedef enum { LOG_DEBUG, LOG_INFO, LOG_WARNING, LOG_ERROR } LogLevel;
 
 volatile sig_atomic_t flag = 0;
 
 const char *level_strings[] = {"DEBUG", "INFO", "WARNING", "ERROR"};
+akita_config_t config;
 
 void sig_handler(int signum) { flag = 1; }
 
@@ -116,7 +117,7 @@ void execute_shell_scripts_in_directory(const char *script_dir) {
   free(namelist);
 }
 
-int read_modbus_data(AkitaConfig *config, uint16_t *current_value) {
+int read_modbus_data(akita_config_t *config, uint16_t *current_value) {
   modbus_t *ctx = modbus_new_tcp(config->host, config->port);
   if (ctx == NULL) {
     perror("Unable to create Modbus context");
@@ -143,47 +144,57 @@ int read_modbus_data(AkitaConfig *config, uint16_t *current_value) {
   return rc;
 }
 
-int parse_config(const char *config_file_path, AkitaConfig *config) {
-  FILE *fp;
-  char line[MAX_LINE_LENGTH];
-  char option[MAX_OPTION_LENGTH];
-  char value[MAX_OPTION_LENGTH];
-
-  fp = fopen(config_file_path, "r");
-  if (fp == NULL) {
+int parse_config(const char *config_file_path, akita_config_t *config) {
+  FILE *file = fopen(config_file_path, "r");
+  if (file == NULL) {
     return -1;
   }
 
-  while (fgets(line, sizeof(line), fp) != NULL) {
-    char *p = line;
-
-    // Skip leading whitespace
-    while (isspace(*p)) {
-      p++;
+  char line[MAX_LINE_LENGTH];
+  char *key, *value;
+  while (fgets(line, MAX_LINE_LENGTH, file) != NULL) {
+    // Remove newline character if present
+    if (line[strlen(line) - 1] == '\n') {
+      line[strlen(line) - 1] = '\0';
     }
 
-    if (sscanf(p, "option %63s '%63[^']'", option, value) == 2) {
-      if (strcmp(option, "host") == 0) {
-        strncpy(config->host, value, MAX_OPTION_LENGTH - 1);
-        config->host[MAX_OPTION_LENGTH - 1] = '\0';
-      } else if (strcmp(option, "port") == 0) {
-        config->port = atoi(value);
-      } else if (strcmp(option, "slave_id") == 0) {
-        config->slave_id = atoi(value);
-      } else if (strcmp(option, "register_address") == 0) {
-        config->register_address = atoi(value);
-      } else if (strcmp(option, "interval") == 0) {
-        config->interval = atoi(value);
-      } else if (strcmp(option, "timeout") == 0) {
-        config->timeout = atoi(value);
-      } else if (strcmp(option, "script_dir") == 0) {
-        strncpy(config->script_dir, value, MAX_OPTION_LENGTH - 1);
-        config->script_dir[MAX_OPTION_LENGTH - 1] = '\0';
-      }
+    // Skip empty lines and comments
+    if (strlen(line) == 0 || line[0] == '#') {
+      continue;
+    }
+
+    // Split line into key and value
+    key = strtok(line, "=");
+    value = strtok(NULL, "=");
+    if (key == NULL || value == NULL) {
+      fprintf(stderr, "Invalid config file format: %s\n", config_file_path);
+      exit(EXIT_FAILURE);
+    }
+
+    // Parse key-value pairs
+    if (strcmp(key, "host") == 0) {
+      strncpy(config->host, value, MAX_OPTION_LENGTH - 1);
+      config->host[MAX_OPTION_LENGTH - 1] = '\0';
+    } else if (strcmp(key, "port") == 0) {
+      config->port = atoi(value);
+    } else if (strcmp(key, "slave_id") == 0) {
+      config->slave_id = atoi(value);
+    } else if (strcmp(key, "register_address") == 0) {
+      config->register_address = atoi(value);
+    } else if (strcmp(key, "interval") == 0) {
+      config->interval = atoi(value);
+    } else if (strcmp(key, "timeout") == 0) {
+      config->timeout = atoi(value);
+    } else if (strcmp(key, "script_dir") == 0) {
+      strncpy(config->script_dir, value, MAX_OPTION_LENGTH - 1);
+      config->script_dir[MAX_OPTION_LENGTH - 1] = '\0';
+    } else {
+      fprintf(stderr, "Unknown key in config file: %s\n", key);
+      exit(EXIT_FAILURE);
     }
   }
 
-  fclose(fp);
+  fclose(file);
   return 0;
 }
 
@@ -193,7 +204,6 @@ int main(int argc, char *argv[]) {
   int opt;
   char *config_file_path = CONFIG_FILE_PATH;
 
-  AkitaConfig config;
   memset(&config, 0, sizeof(config));
 
   while ((opt = getopt(argc, argv, "c:")) != -1) {
@@ -254,5 +264,5 @@ int main(int argc, char *argv[]) {
     sleep(config.interval);
   }
 
-  return 0;
+  return EXIT_SUCCESS;
 }

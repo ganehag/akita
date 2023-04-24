@@ -1,0 +1,7 @@
+host=127.0.0.1
+port=502
+slave_id=1
+register_address=0
+interval=600
+timeout=1800
+script_dir=/etc/akita/scripts.d

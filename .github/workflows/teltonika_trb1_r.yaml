@@ -21,6 +21,7 @@ jobs:
         cp openwrt/akita.init `pwd`/build/etc/init.d/akita
         cp openwrt/akita.config `pwd`/build/etc/config/akita
         mkdir -p `pwd`/build/etc/akita/scripts.d
+        cp akita.conf.example `pwd`/build/etc/akita/akita.conf
         chmod +x `pwd`/build/etc/init.d/akita
         echo "Architecture: arm_cortex-a7_neon-vfpv4" >> build/CONTROL/control
 
