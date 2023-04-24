@@ -34,6 +34,11 @@ jobs:
       with:
         args: ipk-build build .
 
+    - name: "Build IPK package"
+      uses: docker://ganehag/teltonika-sdk-toolchain:RUT9_R_00.07.03.4
+      with:
+        args: bash -c "ls"
+
     - name: Upload binaries to release
       uses: svenstaro/upload-release-action@v2
       with:
