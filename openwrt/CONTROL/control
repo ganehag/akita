@@ -1,0 +1,9 @@
+Package: modbus-akita
+Version: 0.1.0
+Depends: libc, libmodbus
+Source: feeds/packages/net/modbus-akita
+SourceName: akita
+License: GPLv3
+Section: net
+Maintainer: Mikael Ganehag Brorsson <mikael.brorsson@gmail.com>
+Description: Akita is a Modbus Watchdog daemon that monitors a specified Modbus register for changes
