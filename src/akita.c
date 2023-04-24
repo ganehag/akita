@@ -29,16 +29,19 @@ typedef struct {
   int interval;
   int timeout;
   char script_dir[MAX_OPTION_LENGTH];
+  int run_on_exit;
 } akita_config_t;
 
 typedef enum { LOG_DEBUG, LOG_INFO, LOG_WARNING, LOG_ERROR } LogLevel;
 
 volatile sig_atomic_t flag = 0;
-
+volatile sig_atomic_t done = 0;
 const char *level_strings[] = {"DEBUG", "INFO", "WARNING", "ERROR"};
 akita_config_t config;
 
-void sig_handler(int signum) { flag = 1; }
+void sig_alrm_handler(int signum) { flag = 1; }
+
+void sig_int_handler(int signum) { done = 1; }
 
 void log_p(LogLevel level, const char *format, ...) {
   time_t raw_time;
@@ -188,6 +191,8 @@ int parse_config(const char *config_file_path, akita_config_t *config) {
     } else if (strcmp(key, "script_dir") == 0) {
       strncpy(config->script_dir, value, MAX_OPTION_LENGTH - 1);
       config->script_dir[MAX_OPTION_LENGTH - 1] = '\0';
+    } else if (strcmp(key, "run_on_exit") == 0) {
+      config->run_on_exit = (strcmp(value, "true") == 0);
     } else {
       fprintf(stderr, "Unknown key in config file: %s\n", key);
       exit(EXIT_FAILURE);
@@ -196,6 +201,13 @@ int parse_config(const char *config_file_path, akita_config_t *config) {
 
   fclose(file);
   return 0;
+}
+
+void run_termination_scripts() {
+  if (strlen(config.script_dir) > 0) {
+    log_p(LOG_INFO, "executing scripts on termination\n");
+    execute_shell_scripts_in_directory(config.script_dir);
+  }
 }
 
 int main(int argc, char *argv[]) {
@@ -236,12 +248,21 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
 
-  signal(SIGALRM, sig_handler);
+  if (atexit(run_termination_scripts) != 0) {
+    log_p(LOG_ERROR,
+          "unable to register the termination function with atexit.\n");
+    return EXIT_FAILURE;
+  }
+
+  signal(SIGALRM, sig_alrm_handler);
+  if (config.run_on_exit) {
+    signal(SIGINT, sig_int_handler);
+  }
 
   // Arm the alarm
   alarm(config.timeout);
 
-  while (1) {
+  while (!done) {
     if (read_modbus_data(&config, &current_value) == 1) {
       if (current_value != last_value) {
         last_value = current_value;
@@ -263,6 +284,8 @@ int main(int argc, char *argv[]) {
 
     sleep(config.interval);
   }
+
+  log_p(LOG_INFO, "exiting\n");
 
   return EXIT_SUCCESS;
 }

@@ -79,6 +79,7 @@ Options:
 - `interval`: The interval (in seconds) between checking the register for updates
 - `timeout`: The maximum duration (in seconds) before triggering the shell scripts if the register value does not change
 - `script_dir`: The directory containing the shell scripts to be executed when the watchdog is triggered
+- `run_on_exit`: Execute the scripts in the script dir when the program terminates.
 
 
 ## Usage
