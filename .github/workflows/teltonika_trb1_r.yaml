@@ -27,7 +27,7 @@ jobs:
     - name: Build project with Teltonika SDK Toolchain (TRB140, TRB141, TRB142, TRB143, TRB145)
       uses: docker://ganehag/teltonika-sdk-toolchain:TRB1_R_00.07.03.4
       with:
-        args: bash -c "export PATH=/opt/toolchain-arm_cortex-a7+neon-vfpv4_gcc-8.4.0_musl_eabi/bin:$PATH; ./autogen.sh; ./configure --host=arm-openwrt-linux-muslgnueabi --prefix=`pwd`/build/usr && make install"
+        args: bash -c "export PATH=/opt/toolchain-arm_cortex-a7+neon-vfpv4_gcc-8.4.0_musl_eabi/bin:$PATH; ./autogen.sh; ./configure --host=arm-openwrt-linux-muslgnueabi --prefix=`pwd`/build/usr && make install-strip"
 
     - name: "Build IPK package"
       uses: docker://ganehag/teltonika-sdk-toolchain:TRB1_R_00.07.03.4
