@@ -18,10 +18,10 @@ jobs:
         mkdir -p `pwd`/build/etc/init.d
         mkdir -p `pwd`/build/etc/config
         cp -a openwrt/CONTROL `pwd`/build
-        cp openwrt/modbus_akita.init `pwd`/build/etc/init.d/modbus_akita
-        cp openwrt/modbus_akita.config `pwd`/build/etc/config/modbus_akita
-        # mkdir `pwd`/build/etc/config/modbus_akita/scripts.d
-        chmod +x `pwd`/build/etc/init.d/modbus_akita
+        cp openwrt/akita.init `pwd`/build/etc/init.d/akita
+        cp openwrt/akita.config `pwd`/build/etc/config/akita
+        mkdir -p `pwd`/build/etc/akita/scripts.d
+        chmod +x `pwd`/build/etc/init.d/akita
         echo "Architecture: mips_24kc" >> build/CONTROL/control
 
     - name: Build project with Teltonika SDK Toolchain (RUT9_R 900, 905, 950, 955)
@@ -33,11 +33,6 @@ jobs:
       uses: docker://ganehag/teltonika-sdk-toolchain:RUT9_R_00.07.03.4
       with:
         args: ipk-build build .
-
-    - name: "Build IPK package"
-      uses: docker://ganehag/teltonika-sdk-toolchain:RUT9_R_00.07.03.4
-      with:
-        args: bash -c "ls"
 
     - name: Upload binaries to release
       uses: svenstaro/upload-release-action@v2

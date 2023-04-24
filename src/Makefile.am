@@ -1,4 +1,4 @@
-bin_PROGRAMS = modbus_akita
+bin_PROGRAMS = akita
 
-modbus_akita_SOURCES = akita.c
-modbus_akita_LDADD = @MODBUS_LIBS@
+akita_SOURCES = akita.c
+akita_LDADD = @MODBUS_LIBS@
