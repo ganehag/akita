@@ -5,7 +5,7 @@
 *.Po
 
 # Compiled binaries
-modbus_akita
+akita
 *.out
 
 # Temporary files
